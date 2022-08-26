@@ -5,7 +5,7 @@ const {movieSchema} = require('../Schemas.js')
 
 const catchAsync = require('../../Front-End/utils/catchAsync');
 const ExpressError = require('../../Front-End/utils/ExpressError');
-
+const { isLoggedIn } = require("../../Front-End/middleware");
 const Movie = require('../models/movie');
 
 const validateMovie = (req, res, next) => { 
@@ -24,7 +24,7 @@ router.get('/', catchAsync( async (req, res) => {
     res.render('home', {movies})
 }))
 
-router.get('/addMovie', catchAsync( async (req, res) => {
+router.get('/addMovie', isLoggedIn, catchAsync( async (req, res) => {
     res.render('movies/addNew');
 }))
 
@@ -36,7 +36,7 @@ router.post('/', validateMovie, catchAsync(async(req, res, next) => {
 }));
 
 
-router.get('/:id', catchAsync(async (req, res, next) => { 
+router.get('/:id',catchAsync(async (req, res, next) => { 
     const { id } = req.params; 
     const result = await Movie.findById(id).populate('reviews');
     if(!result){
@@ -45,7 +45,7 @@ router.get('/:id', catchAsync(async (req, res, next) => {
     res.render('movies/details', {result}); 
 }));
 
-router.get('/:id/edit', catchAsync(async (req, res, next) => { 
+router.get('/:id/edit', isLoggedIn, catchAsync(async (req, res, next) => { 
     const { id } = req.params; 
     const result = await Movie.findById(id);
     if(!result){

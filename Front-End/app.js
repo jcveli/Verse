@@ -3,10 +3,11 @@ const app = express();
 const mongoose = require('mongoose');
 const path = require('path');
 const ejsMate = require('ejs-mate');
+const User = require('../Back-End/models/user')
 
-const Movie = require('../Back-End/routes/MovieRoute');
-//const User = require('../Back-End/models/user');
-const Review = require('../Back-End/routes/ReviewRoutes');
+const movieRoutes = require('../Back-End/routes/MovieRoute');
+const userRoutes = require('../Back-End/routes/UserRoutes');
+const reviewRoutes = require('../Back-End/routes/ReviewRoutes');
 
 const methodOverride = require('method-override');
 const session = require('express-session');
@@ -23,7 +24,8 @@ const ExpressError = require('./utils/ExpressError');
 
 //connects to the mongoDB database 
 mongoose.connect('mongodb://localhost:27017/movieApp',{
-    useNewUrlParser: true, useUnifiedTopology: true
+    useNewUrlParser: true, 
+    useUnifiedTopology: true
 })
     .then(()=> {
         console.log("CONNECTION OPEN!")
@@ -42,6 +44,7 @@ app.set('view engine', 'ejs');
 
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'))
+app.use(express.static(path.join(__dirname, 'public')))
 
 const sessionConfig = {
     secret: 'thisshouldbeabettersecret!',
@@ -49,18 +52,26 @@ const sessionConfig = {
     saveUninitialized: true,
     cookie: {
         httpOnly: true,
-        expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
-        maxAge: 1000 * 60 * 60 * 24 * 7
+        expires: Date.now() + 1000 * 60 * 60 * 24 * 7, //millisecond/second/minute/hours/week
+        maxAge: 1000 * 60 * 60 * 24 * 7 //1 week maximum
     }
 }
 
+//flash and session use-setup
+app.use(session(sessionConfig));
+app.use(flash());
 
-app.use(session(sessionConfig))
+//login passport initialization
+app.use(passport.initialize()); 
+app.use(passport.session());
+passport.use(new localStrategy(User.authenticate()));
 
-//Flash setup and decleration
-app.use(flash())
+//functions for serialize and deseralize; how to log in and out a user out of the system
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 app.use((req, res, next) => {
+    res.locals.currentUser = req.user; 
     res.locals.success = req.flash('success');
     res.locals.error = req.flash('error');
     next();
@@ -69,9 +80,9 @@ app.use((req, res, next) => {
 
 
 //routes
-app.use('/movie', Movie)
-app.use('/movie/:id/review', Review)
-
+app.use('/movie', movieRoutes)
+app.use('/movie/:id/review', reviewRoutes)
+app.use('/', userRoutes);
 
 
 
@@ -81,6 +92,9 @@ app.use('/movie/:id/review', Review)
 app.get('/', catchAsync(async (req, res, next) => {
     res.render('login')
 }))
+
+
+
 
 
 
