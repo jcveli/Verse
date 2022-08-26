@@ -1,0 +1,11 @@
+
+<% layout('layouts/boilerplate')%>
+<h1><b>Welcome to the movie list page!</b></h1>
+<ul>
+    <% for(let movie of movies) { %>
+        <li><a href="/movie/<%=movie._id%>"><%= movie.title %></a></li>
+    <% } %> 
+</ul>
+
+<a href="/movie/addMovie">Add Movie</a>
+

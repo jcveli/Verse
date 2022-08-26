@@ -1,0 +1,35 @@
+<% layout('layouts/boilerplate')%> 
+<div class="card">
+    <div class="card-header">Edit Movie Details</div>
+    <div class="card-body">
+
+        <form action="/movie/<%=result._id%>/?_method=PUT" method="POST" novalidate class="needs-validation">
+            <label>Movie Title</label>
+            <div class="input-group">
+                <input type="text" class="form-control" id='title' name='movie[title]' value="<%= result.title%>" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="category" class="form-label">category</label>
+                <select id="category" class="form-control" name="movie[category]" value="<%= result.category%>" required>
+                    <option value="Action">Action</option>
+                    <option value="Comedy">Comedy</option>
+                    <option value="Documentary">Documentary</option>
+                    <option value="Drama">Drama</option>
+                    <option value="Horror">Horror</option>
+                    <option value="Romance">Romance</option>
+                    <option value="Sci-fi">Sci-Fi</option>
+                    <option value="Thriller">Thriller</option>
+                </select>
+            </div>
+
+            <label>Movie Description</label>
+            <div class="input-group">
+                <textarea class="form-control" id="about" name="movie[about]" value="<%= result.about %>" style="height: 200px;" required><%= result.about %></textarea>
+            </div>
+            <button class="btn btn-primary mt-3">Update</button>
+        </form>
+        <a class="btn btn-danger mt-3" role="button" href="/movie/<%=result._id%>">Cancel</a>
+    </div>
+    
+</div>
